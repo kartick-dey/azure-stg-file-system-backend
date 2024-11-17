@@ -1,7 +1,7 @@
 {
-    "name": "skeleton-of-node-with-typescript",
+    "name": "azure-stg-file-system-backend",
     "version": "1.0.0",
-    "description": "Basic skeleton of project using node with typescript",
+    "description": "File upload/download system in azure storage",
     "main": "dist/server.js",
     "scripts": {
         "build": "tsc",
