@@ -3,6 +3,8 @@ import { IChunk } from '../model/chunk.interface';
 import { CustomError } from '../utils/customError';
 import { Worker } from 'worker_threads';
 import { FileUtils } from '../utils/fileUtils';
+import * as fs from 'fs';
+import { Response } from 'express';
 
 export class FileUploadService {
     constructor() {}
@@ -41,6 +43,29 @@ export class FileUploadService {
             return { success: true, message: message };
         } catch (error: any) {
             throw new CustomError(error.message || 'Faild to upload chunk', 500);
+        }
+    };
+
+    downloadFileFromDirectory = async (res: Response, fileId: string) => {
+        try {
+            const filePath = path.resolve(__dirname, `../../dist/uploads/${fileId}`);
+            const stat = fs.statSync(filePath);
+            const fileSize = stat.size;
+
+            res.writeHead(200, {
+                'Content-Type': 'application/octet-stream',
+                'Content-Disposition': `attachment; filename=${fileId}`,
+                'Content-Length': fileSize,
+            });
+
+            const readStream = fs.createReadStream(filePath, { highWaterMark: 1 * 1024 * 1024 }); // 1 MB chunks
+
+            readStream.on('error', (err) => {
+                throw new CustomError(err.message || 'Error streaming file', 500);
+            });
+            readStream.pipe(res);
+        } catch (error: any) {
+            throw new CustomError(error.message || 'Failed to download file', 500);
         }
     };
 }
